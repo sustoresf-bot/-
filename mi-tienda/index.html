@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUSTORE - Tienda Online</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* Ajustes rápidos para que se vea bien mientras cargas tus estilos */
+        .product-media img { width: 100%; height: 300px; object-fit: cover; background-color: #f4f4f4; }
+        .intro-slide { min-height: 450px; display: flex; align-items: center; justify-content: center; background-size: cover; background-position: center; }
+        .header-center .logo h1 { font-weight: 800; font-size: 3rem; color: #333; letter-spacing: -1px; }
+        .header-center .logo h1 span { color: #fcb819; } /* Color naranja de la marca */
+    </style>
+</head>
+<body>
+
+    <div class="page-wrapper">
+        
+        <header class="header">
+            <div class="header-middle sticky-header">
+                <div class="container">
+                    <div class="header-left">
+                        <a href="#" class="mobile-menu-toggle"><i class="fas fa-bars"></i></a>
+                    </div>
+                    
+                    <div class="header-center">
+                        <a href="index.html" class="logo">
+                            <h1>SU<span>STORE</span></h1>
+                        </a>
+                    </div>
+
+                    <div class="header-right">
+                        <a href="#" class="search-toggle" title="Buscar"><i class="fas fa-search"></i></a>
+                        <a href="#" class="wishlist" title="Favoritos"><i class="far fa-heart"></i></a>
+                        
+                        <div class="dropdown cart-dropdown type2">
+                            <a href="#" class="cart-toggle">
+                                <i class="fas fa-shopping-bag">
+                                    <span class="cart-count">2</span>
+                                </i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="main">
+            
+            <div class="intro-slider owl-carousel owl-theme owl-nav-inner row cols-1 gutter-no">
+                <div class="intro-slide" style="background-color: #eecda3; background-image: linear-gradient(315deg, #eecda3 0%, #ef629f 74%);">
+                    <div class="container">
+                        <div class="banner-content text-center">
+                            <h3 class="banner-subtitle text-white font-weight-bold mb-2">Nueva Colección</h3>
+                            <h1 class="banner-title text-white font-weight-bolder mb-4">ESTILO URBANO 2025</h1>
+                            <a href="#" class="btn btn-white btn-outline btn-rounded text-white">Ver Productos <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="intro-slide" style="background-color: #2f3945;">
+                    <div class="container">
+                        <div class="banner-content text-center">
+                            <h3 class="banner-subtitle text-primary mb-2">Ofertas Especiales</h3>
+                            <h1 class="banner-title text-white font-weight-bolder mb-4">HASTA 50% OFF</h1>
+                            <a href="#" class="btn btn-primary btn-rounded">Comprar Ahora</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-content container mt-10 mb-10">
+                <h2 class="title title-center mb-5">Destacados de la Semana</h2>
+                
+                <div class="row cols-2 cols-md-3 cols-lg-4 product-wrapper">
+                    
+                    <div class="product-wrap">
+                        <div class="product text-center">
+                            <figure class="product-media">
+                                <a href="#">
+                                    <img src="https://via.placeholder.com/300x300?text=Remera+Oversize" alt="Producto">
+                                </a>
+                                <div class="product-action-vertical">
+                                    <a href="#" class="btn-product-icon" title="Favoritos"><i class="far fa-heart"></i></a>
+                                </div>
+                                <div class="product-action">
+                                    <a href="#" class="btn-product btn-cart">Agregar al Carrito</a>
+                                </div>
+                            </figure>
+                            <div class="product-details">
+                                <div class="product-cat"><a href="#">Ropa</a></div>
+                                <h3 class="product-name"><a href="#">Remera Oversize Black</a></h3>
+                                <div class="product-price">
+                                    <span class="price">$15.000</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="product-wrap">
+                        <div class="product text-center">
+                            <figure class="product-media">
+                                <a href="#">
+                                    <img src="https://via.placeholder.com/300x300?text=Buzo+Hoodie" alt="Producto">
+                                </a>
+                                <div class="product-label-group">
+                                    <label class="product-label label-new">Nuevo</label>
+                                </div>
+                                <div class="product-action-vertical">
+                                    <a href="#" class="btn-product-icon" title="Favoritos"><i class="far fa-heart"></i></a>
+                                </div>
+                                <div class="product-action">
+                                    <a href="#" class="btn-product btn-cart">Agregar al Carrito</a>
+                                </div>
+                            </figure>
+                            <div class="product-details">
+                                <div class="product-cat"><a href="#">Abrigos</a></div>
+                                <h3 class="product-name"><a href="#">Buzo Hoodie Gris</a></h3>
+                                <div class="product-price">
+                                    <span class="new-price">$35.000</span>
+                                    <span class="old-price">$42.000</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="product-wrap">
+                        <div class="product text-center">
+                            <figure class="product-media">
+                                <a href="#">
+                                    <img src="https://via.placeholder.com/300x300?text=Gorra+Street" alt="Producto">
+                                </a>
+                                <div class="product-action">
+                                    <a href="#" class="btn-product btn-cart">Agregar al Carrito</a>
+                                </div>
+                            </figure>
+                            <div class="product-details">
+                                <div class="product-cat"><a href="#">Accesorios</a></div>
+                                <h3 class="product-name"><a href="#">Gorra Streetwear</a></h3>
+                                <div class="product-price">
+                                    <span class="price">$8.500</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="product-wrap">
+                        <div class="product text-center">
+                            <figure class="product-media">
+                                <a href="#">
+                                    <img src="https://via.placeholder.com/300x300?text=Pantalón+Cargo" alt="Producto">
+                                </a>
+                                <div class="product-action">
+                                    <a href="#" class="btn-product btn-cart">Agregar al Carrito</a>
+                                </div>
+                            </figure>
+                            <div class="product-details">
+                                <div class="product-cat"><a href="#">Pantalones</a></div>
+                                <h3 class="product-name"><a href="#">Pantalón Cargo Beige</a></h3>
+                                <div class="product-price">
+                                    <span class="price">$28.000</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-middle">
+                    <div class="row">
+                        <div class="col-lg-4 col-md-12">
+                            <div class="widget widget-about">
+                                <h4 class="widget-title">Sobre SUSTORE</h4>
+                                <p>Tu destino número uno para moda urbana en Argentina. Calidad, estilo y los mejores precios.</p>
+                                <div class="social-links">
+                                    <a href="#" class="social-link social-facebook" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                                    <a href="#" class="social-link social-instagram" title="Instagram"><i class="fab fa-instagram"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6">
+                            <div class="widget">
+                                <h4 class="widget-title">Ayuda</h4>
+                                <ul class="widget-body">
+                                    <li><a href="#">Cómo comprar</a></li>
+                                    <li><a href="#">Envíos y Entregas</a></li>
+                                    <li><a href="#">Cambios y Devoluciones</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6">
+                            <div class="widget">
+                                <h4 class="widget-title">Contacto</h4>
+                                <ul class="widget-body">
+                                    <li><i class="fas fa-map-marker-alt mr-2"></i> Buenos Aires, Argentina</li>
+                                    <li><i class="fas fa-envelope mr-2"></i> info@sustore.com</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <div class="footer-center">
+                        <p class="copyright">SUSTORE © 2025. Todos los derechos reservados.</p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+    
+    <script>
+        // Inicializar el carrusel principal
+        $(document).ready(function(){
+            $('.intro-slider').owlCarousel({
+                items: 1,
+                loop: true,
+                nav: false, // Flechas desactivadas para diseño limpio
+                dots: true, // Puntitos abajo activados
+                autoplay: true,
+                autoplayTimeout: 5000
+            });
+        });
+    </script>
+</body>
+</html>
