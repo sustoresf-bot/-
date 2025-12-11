@@ -1,0 +1,1021 @@
+$(document).ready(function(){
+	jQuery.fn.getCheckboxValues = function(){
+		var valores = "";
+		var i = 0;
+		this.each(function(){
+			valores+= $(this).val()+"|";
+		});
+		return valores;
+	}
+//    $('#divnovedad').modal('show');
+
+	var contador = 1;
+
+	main();	
+})
+$(function() {
+  function slideMenu() {
+    var activeState = $("#menu-container .menu-list").hasClass("active");
+    $("#menu-container .menu-list").animate({left: activeState ? "0%" : "-100%"}, 400);
+  }
+  $("#menu-wrapper").click(function(event) {
+    event.stopPropagation();
+    $("#hamburger-menu").toggleClass("open");
+    $("#menu-container .menu-list").toggleClass("active");
+    slideMenu();
+
+    $("body").toggleClass("overflow-hidden");
+  });
+
+  $(".menu-list").find(".accordion-toggle").click(function() {
+    $(this).next().toggleClass("open").slideToggle("fast");
+    $(this).toggleClass("active-tab").find(".menu-link").toggleClass("active");
+
+    $(".menu-list .accordion-content").not($(this).next()).slideUp("fast").removeClass("open");
+    $(".menu-list .accordion-toggle").not(jQuery(this)).removeClass("active-tab").find(".menu-link").removeClass("active");
+  });
+}); // jQuery load
+
+
+function main () {
+	// Busqueda de productos
+	$(".search").autocomplete("ajax/buscaarticulo.php", {
+		cacheLength: 0
+	});
+	$(".search").result(function(event, data, formatted) {
+		var vid = $(this).attr("id");
+		respuesta = data[0].split("&");
+		if (data[1] == '0'){
+			document.location.href = "resultados.php?art_denom="+data[2];		
+		}else{
+			document.location.href = "articulo.php?id="+data[1];		
+		}
+	});
+}
+function fnbuscardatos(vclasif, vpagina){
+	var vmarca = $("input[name=marcas]:checked").getCheckboxValues();
+	if (url.indexOf("tienda.php") == -1 && url.indexOf("resultados.php") == -1){
+		console.log("salgo4");
+    //  document.location.href = "index.php?clasif="+vclasif+"&pagina="+vpagina+"&marca="+vmarca;
+	}else{
+		if (vpagina != 1){
+			$("#count").attr("disabled", true);
+			$("#count").attr("title", "Sólo desde la página 1 se puede modificar la cantidad de productos a visualizar");
+		}else{
+			$("#count").attr("title", "");
+			$("#count").attr("disabled", false);
+		}
+		$("#datos").html("Buscando ...");
+//		$("#paginas").html("Buscando ...");
+		$.ajax({
+			url: "ajax/datos.php",
+			global: false,
+			type: "POST",
+			data: ({clasif : vclasif, pagina : vpagina, marca : vmarca, nuevos : nuevos, ofertas : ofertas, ultorden : ultorden, art_denom : art_denom, count : $("#count").val()}),
+			dataType: "html",
+			async:true,
+			success: function(result){
+				respuesta = result.split("&&&");
+				localStorage.clear();
+				localStorage.setItem("clasif", vclasif);
+				localStorage.setItem("pagina", vpagina);
+				localStorage.setItem("marca", vmarca);
+				localStorage.setItem("nuevos", nuevos);
+				localStorage.setItem("ofertas", ofertas);
+				localStorage.setItem("ultorden", ultorden);
+				localStorage.setItem("art_denom", art_denom);
+
+				if (url.indexOf("tienda.php") > -1){
+					var urlN = "tienda.php?clasif="+vclasif+"&pagina="+vpagina+"&marca="+vmarca+"&nuevos="+nuevos+"&ofertas="+ofertas;
+				}else{
+					var urlN = "resultados.php?clasif="+vclasif+"&pagina="+vpagina+"&marca="+vmarca+"&nuevos="+nuevos+"&ofertas="+ofertas+"&art_denom="+art_denom;
+				}
+				history.pushState(null, null, urlN); 
+
+				clasif = vclasif;
+				pagina = vpagina;
+
+                $("#articulos").empty();
+				
+                vdatos = respuesta[0].split("<@>");
+                nvdatos = vdatos.length;
+                for (var n = 1; n < nvdatos; n++){
+                    var vcampos = vdatos[n].split("<#>");
+                    
+                    var varticulo = '<div class="product-wrap">';
+                        varticulo+= '<div class="product text-center">';
+                            varticulo+= '<figure class="product-media">';
+                                varticulo+= '<a href="'+vcampos[1]+'"><img src="'+vcampos[0]+'?v='+fecha+'" alt="product" style="height: 315px"></a>';
+                                varticulo+= '<div class="product-action-vertical">';
+								if (parseInt(vcampos[8], 10) <= 0){
+									varticulo+= '<a href="#" class="btn-product-icon btn-cart btn-product-icont btn-product-sinstock">Sin Stock</a>';
+                                }else{
+									if (vcampos[4] != ''){
+										varticulo+= '<a href="#" class="btn-product-icon btn-cart btn-product-icont btn-product-destacado">Destacado</a>';
+									}
+									if (vcampos[2] == 'S'){
+										varticulo+= '<a href="#" class="btn-product-icon btn-cart btn-product-icont btn-product-nuevo">Nuevo</a>';
+									}else if (vcampos[2] == 'X'){
+										varticulo+= '<a href="#" class="btn-product-icon btn-cart btn-product-icont btn-product-reingreso">Reingreso</a>';
+									}
+								}
+
+                                //  varticulo+= '<a href="#" class="btn-product-icon btn-wishlist" title="Add to wishlist"><i class="d-icon-heart"></i></a>';
+                                //  varticulo+= '<a href="#" class="btn-product-icon btn-compare" title="Add to compare"><i class="d-icon-compare"></i></a>';
+                                varticulo+= '</div>';
+                                varticulo+= '<div class="productId" style="display: none">'+vcampos[3]+'</div><div class="product-action"><a class="btn-product btn-quickview" title="Vista Rápida" id="productId-'+vcampos[3]+'">Vista Rápida</a></div>';
+                            varticulo+= '</figure>';
+                            varticulo+= '<div class="product-details">';
+                                varticulo+= '<div class="product-cat"><a href="articulo.php?id='+vcampos[3]+'">'+vcampos[10]+'</a></div>';
+                                varticulo+= '<h3 class="product-name"><a href="articulo.php?id='+vcampos[3]+'">'+vcampos[5]+'</a></h3>';
+                                varticulo+= '<div class="product-price">';
+								//	if (vcampos[9] == 'S'){
+									//	if (parseFloat(vcampos[11]) != 0){
+									//		varticulo+= '<ins class="new-price">Precio: '+vcampos[12]+'</ins><br>';
+									//		varticulo+= '<ins class="new-price" style="color: red">Bonif. P/Compras + de $ 50.000: '+vcampos[11]+'</ins><br>';
+									//		varticulo+= '<ins class="new-price">Neto: '+vcampos[7]+'</ins>';
+									//	}else{
+									//		varticulo+= '<ins class="new-price">Precio: '+vcampos[7]+'</ins>';											
+									//	}
+								//	}else{
+								//		varticulo+= '<ins class="new-price">'+vcampos[7]+'</ins>';
+								//	}
+								varticulo+= '<ins class="new-price">$ '+vcampos[7]+'</ins>';
+								varticulo+= '</div>';
+								
+								if (vcampos[9] == 'S' && parseInt(vcampos[8], 10) > 0){
+									varticulo+= '<div class="input-group mr-2">';
+                                    //  varticulo+= '<input type="number" value="1" min=0 max="'+vcampos[8]+'" style="border: 1px" class="cantidad" id="cantidad-'+vcampos[3]+'">';
+									//	varticulo+= '<button class="quantity-minus d-icon-minus"></button>';
+                                        varticulo+= '<input class="quantity form-control cantidad" type="number" min="0" max="'+vcampos[8]+'" value="1" id="cantidad-'+vcampos[3]+'">';
+                                	//  varticulo+= '<button class="quantity-plus d-icon-plus"></button>';
+										//  varticulo+= ' <button id="agregar" class="agregar" onclick="fnagregar('+vcampos[3]+')">Agregar</button>
+										
+									//	varticulo+= '<button class="btn-product btn-cart text-normal ls-normal font-weight-semi-bold"><i class="d-icon-bag"></i>Agregar</button>';
+										varticulo+= '<div class="product-action">';
+										varticulo+= '<a href="#" class="btn-product btn-cart" data-toggle="modal" data-target="#addCartModal" title="Add to cart"><i class="d-icon-bag"></i><span>Agregar</span></a>';
+										varticulo+= '</div>';
+										varticulo+= '</div>';
+										varticulo+= '<span id="mensaje-'+vcampos[3]+'"></span>';
+
+                                    }
+									
+                            //  varticulo+= '<div class="ratings-container">';
+                            //      varticulo+= '<div class="ratings-full">';
+                            //          varticulo+= '<span class="ratings" style="width:100%"></span>';
+                            //          varticulo+= '<span class="tooltiptext tooltip-top"></span>';
+                            //      varticulo+= '</div>';
+                            //      varticulo+= '<a href="#" class="rating-reviews">( 6 reviews )</a>';
+                            //  varticulo+= '</div>';
+                            varticulo+= '</div>';
+                        varticulo+= '</div>';
+                    varticulo+= '</div>';
+
+                    $("#articulos").append(varticulo);
+                }
+
+                $("#datos").html(respuesta[0]);
+			//	$("#paginas1").html(respuesta[1]);
+				$("#paginas").html(respuesta[1]);
+				ultorden = respuesta[2];
+			//	$("#cart-price").html(numcarrito);
+			//	$("#numcarrito").html(numcarrito);
+			//	if (nuevos == "S"){
+				//	$("#btnnuevos").prop("checked", "true");
+			//	}else{
+			//		$("#btnnuevos").prop("checked", "false");
+			//	}
+				if (ofertas == "S"){
+					$("#btnofertas").prop("checked", "true");
+				}else{
+					$("#btnofertas").prop("checked", "false");
+				}
+				$("header nav").css("display", "none");
+			}
+		})
+	}
+}
+function fnvistarapida(){
+    $('html').css('overflow-y', 'hidden');
+    $('body').css('overflow-x', 'visible');
+    $('#fondovista').show();
+    $('#vistaprevia').show();
+}
+function fnbuscarnuevos(){
+	if ($("#btnnuevos").is(":checked")){
+		nuevos = "S";
+	}else{
+		nuevos = "N";
+	}
+	var vmarca = $("input[name=marcas]:checked").getCheckboxValues();
+	$("#datos").html("Buscando ...");
+//	$("#paginas").html("Buscando ...");
+	$.ajax({
+		url: "ajax/datos.php",
+		global: false,
+		type: "POST",
+		data: ({clasif : clasif, pagina : pagina, marca : vmarca, nuevos : nuevos, ofertas : ofertas}),
+		dataType: "html",
+		async:true,
+		success: function(result){
+			respuesta = result.split("&&&");
+			$("#datos").html(respuesta[0]);
+			$("#paginas1").html(respuesta[1]);
+			$("#paginas2").html(respuesta[1]);
+			$("#numcarrito").html(numcarrito);
+		//	if (nuevos == "S"){
+		//		$("#btnnuevos").prop("checked", "true");
+		//	}else{
+		//		$("#btnnuevos").prop("checked", "false");
+		//	}
+		}
+	})
+}
+function fnbuscarofertas(){
+	if ($("#btnofertas").is(":checked")){
+		ofertas = "S";
+	}else{
+		ofertas = "N";
+	}
+	var vmarca = $("input[name=marcas]:checked").getCheckboxValues();
+	$("#datos").html("Buscando ...");
+//	$("#paginas").html("Buscando ...");
+	$.ajax({
+		url: "ajax/datos.php",
+		global: false,
+		type: "POST",
+		data: ({clasif : clasif, pagina : pagina, marca : vmarca, nuevos : nuevos, ofertas : ofertas}),
+		dataType: "html",
+		async:true,
+		success: function(result){
+			respuesta = result.split("&&&");
+			$("#datos").html(respuesta[0]);
+			$("#paginas1").html(respuesta[1]);
+			$("#paginas2").html(respuesta[1]);
+			$("#numcarrito").html(numcarrito);
+		//	if (nuevos == "S"){
+		//		$("#btnnuevos").prop("checked", "true");
+		//	}else{
+		//		$("#btnnuevos").prop("checked", "false");
+		//	}
+		}
+	})
+}
+function fnfiltrar(){
+	$('#collapseOne').removeClass("show");
+	fnbuscardatos(clasif, pagina);
+}
+function validate(evt) {
+	var theEvent = evt || window.event;
+	// Handle paste
+	if (theEvent.type === 'paste') {
+		key = event.clipboardData.getData('text/plain');
+	}else{
+		// Handle key press
+		var key = theEvent.keyCode || theEvent.which;
+		key = String.fromCharCode(key);
+	}
+	var regex = /[0-9]|\-/;
+	if (!regex.test(key)) {
+		theEvent.returnValue = false;
+		if(theEvent.preventDefault) theEvent.preventDefault();
+	}
+}
+function fnbuscar(){
+	document.location.href = "resultados.php?art_denom="+$("#busqueda").val()
+}
+function fnagregar(vid){
+	if ($("#cantidad-"+vid).val() == 0){
+		alert("Ingrese la cantidad deseada");
+		$("#cantidad-"+vid).focus();
+		return false;
+	}
+	$.ajax({
+		url: "ajax/agregararticulo.php",
+		global: false,
+		type: "POST",
+		data: ({pedido : pedido, articulo : vid, cantidad : $("#cantidad-"+vid).val()}),
+		dataType: "html",
+		async:true,
+		success: function(result){
+			respuesta = result.split("&&&");
+			if (respuesta[0] != "OK"){
+				$("#mensaje-"+vid).css("color", "red");
+				$("#mensaje-"+vid).html("Error al agregar al carrito");
+				console.log(result)
+				return false;
+			}
+			numcarrito = parseInt(respuesta[1], 10);
+			$("#numcarrito").html(numcarrito);
+			$("#cart-price").html("$ "+respuesta[2]);
+		//	Riode.Minipopup.open({
+		//		message: "Agregado correctamente!!!",
+		//		productClass: "product-cart",
+		//		name: "Nombre Articulo",
+		//		nameLink: "Link",
+		//		imageSrc: "SRC imagen",
+		//		imageLink: "Link magen",
+		//		price: "1",
+		//		count: $("#cantidad-"+vid).val(),
+		//		actionTemplate: '<div class="action-group d-flex"><a href="carrito.php" class="btn btn-sm btn-outline btn-primary btn-rounded">Ver Carrito</a><a href="carrito.php" class="btn btn-sm btn-primary btn-rounded">Check Out</a></div>'
+		//	})
+			$("#mensaje-"+vid).css("color", "green");
+			$("#mensaje-"+vid).html(respuesta[3]);
+		}
+	})
+}
+function fnactualizarmenos(vid){
+	var cant = parseInt($("#cantidad-"+vid).val(), 10) - 1;
+	if (cant < 1){
+		return false;
+	}
+	$("#cantidad-"+vid).val(cant);
+	fnactualizar(vid)
+}
+function fnactualizarmas(vid){
+	var cant = parseInt($("#cantidad-"+vid).val(), 10) + 1;
+	$("#cantidad-"+vid).val(cant);
+	fnactualizar(vid)
+}
+function fnactualizar(vid){
+	console.log("id: "+vid+" cantidad: "+$("#cantidad-"+vid).val())
+	if ($("#cantidad-"+vid).val() == 0){
+		alert("Ingrese la cantidad deseada");
+		$("#cantidad-"+vid).focus();
+		return false;
+	}
+	$.ajax({
+		url: "ajax/actualizararticulo.php",
+		global: false,
+		type: "POST",
+		data: ({pedido : pedido, articulo : vid, cantidad : $("#cantidad-"+vid).val()}),
+		dataType: "html",
+		async:true,
+		success: function(result){
+			respuesta = result.split("&&&");
+			if (respuesta[0] != "OK"){
+				$("#mensaje-"+vid).css("color", "red");
+				$("#mensaje-"+vid).html("Error al agregar al carrito");
+				console.log(result);
+				return false;
+			}
+			$("#precio-"+vid).html(respuesta[3]);
+			$("#bonif-"+vid).html(respuesta[6]);
+			$("#mensaje-"+vid).css("color", "green");
+			$("#mensaje-"+vid).html("<br>Producto actualizado!");
+			numcarrito = parseInt(respuesta[1], 10);
+			$("#numcarrito").html(numcarrito);
+			$("#cart-price").html("$ "+respuesta[2]);
+			$("#precio-carrito").html("$ "+respuesta[2]);
+		}
+	})
+}
+function fneliminar(vid){
+	if (!confirm("CONFIRMA QUE DESEA ELIMINAR ESTE ARTICULO DE SU CARRITO?")){
+		return false;
+	}
+	$.ajax({
+		url: "ajax/eliminararticulo.php",
+		global: false,
+		type: "POST",
+		data: ({pedido : pedido, articulo : vid}),
+		dataType: "html",
+		async:true,
+		success: function(result){
+			respuesta = result.split("&&&");
+			if (respuesta[0] != "OK"){
+				$("#mensaje-"+vid).css("color", "red");
+				$("#mensaje-"+vid).html("Error al eliminar del carrito");
+				console.log(result)
+				return false;
+			}
+			if (url.indexOf("carrito.php") > -1){
+				document.location.reload();
+			}else{
+				$("#row-"+vid).remove();
+				$("#mensaje-"+vid).html("Producto eliminado del carrito!");
+				numcarrito = parseInt(respuesta[1], 10);
+				$("#numcarrito").html(numcarrito);
+				$("#precio-carrito").html("$ "+respuesta[2]);
+				$("#cart-price").html("$ "+respuesta[2]);
+				if (numcarrito == 0){
+					$(".cart-dropdown").removeClass("opened");
+				}else{
+					fnvercarrito();
+				}
+			}
+		}
+	})
+}
+function fnfinalizar(){
+	if (fincar == 'N'){
+		console.log("espere, carrito enviandose...");
+		return false;
+	}
+	fincar = 'N';
+	if (numcarrito == 0){
+		$("#mensaje").css("color", "red");
+		$("#mensaje").html("EL CARRITO ESTA VACIO");
+		fincar = 'S';
+		return false;
+	}
+	if (!$("#condiciones").is(":checked")){
+		$("#mensaje").css("color", "red");
+		$("#mensaje").html("Debe aceptar las condiciones de la garantia");
+		fincar = 'S';
+		return false;
+	}
+	if (!confirm("CONFIRMA QUE LEYO LAS CONDICIONES DE LA GARANTIA Y QUE DESEA SOLICITAR PRESUPUESTO")){
+		fincar = 'S';
+		return false;
+	}
+	$(".cantidad").attr("disabled", true);
+	$.ajax({
+		url: "ajax/solicitarpresupuesto.php",
+		global: false,
+		type: "POST",
+		data: ({pedido : pedido}),
+		dataType: "html",
+		async:true,
+		success: function(result){
+			respuesta = result.split("&&&");
+			fincar = 'S';
+			if (respuesta[0] != "OK" && respuesta[0] != "STOCK"){
+				$("#mensaje").css("color", "red");
+				$("#mensaje").html("Error al Soliciar el Presupuesto");
+				$(".cantidad").attr("disabled", false);
+				console.log(result)
+				return false;
+			}
+			if (respuesta[0] == "STOCK"){
+				$("#mensaje").css("color", "red");
+				$("#mensaje").html("Hay articulos sin stock, por favor eliminelos o modifique el stock");
+				var vsinstock = respuesta[1].split("<@>");
+				var nsinstock = vsinstock.length;
+				$(".rowcarrito").css("background-color", "#e6e6f6");
+				for (var s = 0; s < nsinstock; s++){
+					var dsinstock = vsinstock[s].split("<#>");
+					$("#row-"+dsinstock[0]).css("background-color", "#F7B09F");
+				}
+				$(".cantidad").attr("disabled", false);
+				return false;
+			}
+			$("#finalizar").hide();
+			$(".btneliminar").hide();
+			$(".product-remove").hide();
+			$(".btnagregar").hide();
+			$(".cantidad").attr("disabled", true);
+			$("#mensaje").css("color", "green");
+			$("#mensaje").html("Presupuesto enviado correctamente!");
+		}
+	})
+}
+function fnregistrarse(){
+	if ($.trim($("#nombre").val()) == ""){
+		mierror("DEBE INGRESAR SU NOMBRE", "E");
+		$("#nombre").focus();
+		return false;
+	}
+	if ($.trim($("#cuit").val()) == ""){
+		mierror("DEBE INGRESAR SU DOCUMENTO/CUIL/CUIT", "E");
+		$("#cuit").focus();
+		return false;
+	}
+	if ($.trim($("#direc").val()) == ""){
+		mierror("DEBE INGRESAR SU DIRECCIÓN", "E");
+		$("#direc").focus();
+		return false;
+	}
+	if ($.trim($("#cp").val()) == ""){
+		mierror("DEBE INGRESAR SU CÓDIGO POSTAL", "E");
+		$("#cp").focus();
+		return false;
+	}
+	if ($.trim($("#localidad").val()) == ""){
+		mierror("DEBE INGRESAR SU LOCALIDAD", "E");
+		$("#localidad").focus();
+		return false;
+	}
+	if ($.trim($("#emailr").val()) == ""){
+		mierror("DEBE INGRESAR UN CORREO ELECTRÓNICO", "E");
+		$("#emailr").focus();
+		return false;
+	}
+	if ($.trim($("#telef").val()) == ""){
+		mierror("DEBE INGRESAR SU Nº DE TELEFONO", "E");
+		$("#telef").focus();
+		return false;
+	}
+//	if ($.trim($("#password").val()) == ""){
+//		mierror("DEBE INGRESAR SU CONTRASEÑA", "E");
+//		$("#password").focus();
+//		return false;
+//	}
+//	if ($.trim($("#rpassword").val()) == ""){
+//		mierror("DEBE INGRESAR LA CONFIRMACIÓN DE SU CONTRASEÑA", "E");
+//		$("#rpassword").focus();
+//		return false;
+//	}
+//	if ($("#password").val() != $("#rpassword").val()){
+//		mierror("LA CONTRASEÑA INGRESADA Y SU CONFIRMACIÓN NO COINCIDEN", "E");
+//		$("#rpassword").focus();
+//		return false;
+//	}
+	if (!$("#condicionesr").prop("checked")){
+		mierror("Debe aceptar los términos y condiciones");
+		return false;
+	}
+//	if (!confirm("CONFIRMA QUE DESEA SOLICITAR PRESUPUESTO")){
+//		return false;
+//	}
+	$(".mensaje").css("color", "black");
+	$(".mensaje").html("Espere por favor...");
+	$.ajax({
+		url: "ajax/registrarse.php",
+		global: false,
+		type: "POST",
+		data: ({nombre : $("#nombre").val(), cuit : $("#cuit").val(), direc : $("#direc").val(), tdirec : $("#tdirec").val(), cp : $("#localidad").val(), localidad : $('select[name="localidad"] option:selected').text(), telef : $("#telef").val(), email : $("#emailr").val(), password : $("#password").val(), rpassword : $("#rpassword").val()}),
+		dataType: "html",
+		async:true,
+		success: function(result){
+			respuesta = result.split("&&&");
+			if (respuesta[0] != "OK"){
+				$(".mensaje").css("color", "red");
+				$(".mensaje").html(respuesta[1]);
+				console.log(result)
+				return false;
+			}
+			$(".mensaje").css("color", "green");
+			if (s_sistema == "TECNOCELL"){
+				$(".mensaje").html("Solicitud enviada correctamente!<br>Pronto nos pondremos en contacto con usted, para brindarle los datos de acceso a la tienda online");
+			}else{
+				$(".mensaje").html("Usuario registrado correctamente!<br>Revise su correo "+$("#emailr").val()+" y active su cuenta");
+			}
+		}
+	})
+}
+function fnregistrarseh(){
+	if ($.trim($("#register-nombre").val()) == ""){
+		mierror("DEBE INGRESAR SU NOMBRE", "E");
+		$("#register-nombre").focus();
+		return false;
+	}
+	if ($.trim($("#register-cuit").val()) == ""){
+		mierror("DEBE INGRESAR SU DOCUMENTO/CUIL/CUIT", "E");
+		$("#register-cuit").focus();
+		return false;
+	}
+	if ($.trim($("#register-direc").val()) == ""){
+		mierror("DEBE INGRESAR SU DIRECCIÓN", "E");
+		$("#register-direc").focus();
+		return false;
+	}
+	if ($.trim($("#register-cp").val()) == ""){
+		mierror("DEBE INGRESAR SU CÓDIGO POSTAL", "E");
+		$("#register-cp").focus();
+		return false;
+	}
+	if ($.trim($("#register-localidad").val()) == ""){
+		mierror("DEBE INGRESAR SU LOCALIDAD", "E");
+		$("#register-localidad").focus();
+		return false;
+	}
+	if ($.trim($("#register-emailr").val()) == ""){
+		mierror("DEBE INGRESAR UN CORREO ELECTRÓNICO", "E");
+		$("#register-emailr").focus();
+		return false;
+	}
+	if ($.trim($("#register-telef").val()) == ""){
+		mierror("DEBE INGRESAR SU Nº DE TELEFONO", "E");
+		$("#register-telef").focus();
+		return false;
+	}
+//	if ($.trim($("#register-password").val()) == ""){
+//		mierror("DEBE INGRESAR SU CONTRASEÑA", "E");
+//		$("#register-password").focus();
+//		return false;
+//	}
+//	if ($.trim($("#register-rpassword").val()) == ""){
+//		mierror("DEBE INGRESAR LA CONFIRMACIÓN DE SU CONTRASEÑA", "E");
+//		$("#register-rpassword").focus();
+//		return false;
+//	}
+//	if ($("#register-password").val() != $("#register-rpassword").val()){
+//		mierror("LA CONTRASEÑA INGRESADA Y SU CONFIRMACIÓN NO COINCIDEN", "E");
+//		$("#register-rpassword").focus();
+//		return false;
+//	}
+	if (!$("#register-condicionesr").prop("checked")){
+		mierror("Debe aceptar los términos y condiciones");
+		return false;
+	}
+//	if (!confirm("CONFIRMA QUE DESEA SOLICITAR PRESUPUESTO")){
+//		return false;
+//	}
+	$(".mensaje").css("color", "black");
+	$(".mensaje").html("Espere por favor...");
+	$.ajax({
+		url: "ajax/registrarse.php",
+		global: false,
+		type: "POST",
+		data: ({nombre : $("#register-nombre").val(), cuit : $("#register-cuit").val(), direc : $("#register-direc").val(), tdirec : $("#register-tdirec").val(), cp : $("#register-cp").val(), localidad : $("#register-localidad").val(), telef : $("#register-telef").val(), email : $("#register-emailr").val(), password : $("#register-password").val(), rpassword : $("#register-rpassword").val()}),
+		dataType: "html",
+		async:true,
+		success: function(result){
+			respuesta = result.split("&&&");
+			if (respuesta[0] != "OK"){
+				$(".mensaje").css("color", "red");
+				$(".mensaje").html(respuesta[1]);
+				console.log(result)
+				return false;
+			}
+			$(".mensaje").css("color", "green");
+			if (s_sistema == "TECNOCELL"){
+				$(".mensaje").html("Solicitud enviada correctamente!<br>Pronto nos pondremos en contacto con usted, para brindarle los datos de acceso a la tienda online");
+			}else{
+				$(".mensaje").html("Usuario registrado correctamente!<br>Revise su correo "+$("#emailr").val()+" y active su cuenta");
+			}
+		}
+	})
+}
+function fnactpass(){
+	if ($.trim($("#password").val()) == ""){
+		mierror("DEBE INGRESAR SU CONTRASEÑA", "E");
+		$("#password").focus();
+		return false;
+	}
+	if ($.trim($("#rpassword").val()) == ""){
+		mierror("DEBE INGRESAR LA CONFIRMACIÓN DE CONTRASEÑA", "E");
+		$("#rpassword").focus();
+		return false;
+	}
+	if ($.trim($("#password").val()) != $.trim($("#rpassword").val())){
+		mierror("LA CONTRASEÑA INGRESADA NO COINCIDE CON LA CONFIRMACIÓN", "E");
+		$("#rpassword").focus();
+		return false;
+	}
+/*	if (!confirm("CONFIRMA QUE DESEA SOLICITAR PRESUPUESTO")){
+		return false;
+	}	*/
+	$(".mensaje").css("color", "black");
+	$(".mensaje").html("Espere por favor...");
+	$.ajax({
+		url: "ajax/cambiarpass.php",
+		global: false,
+		type: "POST",
+		data: ({password : $("#password").val()}),
+		dataType: "html",
+		async:true,
+		success: function(result){
+			respuesta = result.split("&&&");
+			if (respuesta[0] != "OK"){
+				$(".mensaje").css("color", "red");
+				$(".mensaje").html(respuesta[1]);
+				console.log(result)
+				return false;
+			}
+            alert("salgo1");
+		//	document.location.href = "index.php";
+		}
+	})
+}
+function fnlogin() {
+    if (recupero == "S") {
+        var xemail = email;
+    } else {
+        if ($.trim($("#email").val()) == "") {
+            mierror("DEBE INGRESAR SU EMAIL", "E");
+            $("#email").focus();
+            return false;
+        }
+        var xemail = $.trim($("#email").val());
+    }
+    //	if ($.trim($("#password").val()) == ""){
+    //		mierror("DEBE INGRESAR SU CONTRASEÑA", "E");
+    //		$("#password").focus();
+    //		return false;
+    //	}
+    /*	if (!confirm("CONFIRMA QUE DESEA SOLICITAR PRESUPUESTO")){
+        return false;
+    }	*/
+    $(".mensaje").css("color", "black");
+    $(".mensaje").html("Espere por favor...");
+    $.ajax({
+        url: "ajax/iniciarsesion.php",
+        global: false,
+        type: "POST",
+        data: ({
+            email: xemail,
+            password: $("#password").val(),
+            recupero: recupero
+        }),
+        dataType: "html",
+        async: true,
+        success: function(result) {
+            var respuesta = result.split("&&&");
+            if (respuesta[0] != "OK") {
+                $(".mensaje").css("color", "red");
+                $(".mensaje").html(respuesta[1]);
+                console.log(result)
+                return false;
+            }
+            document.location.href = "home.php";
+        }
+    })
+}
+function fnloginh() {
+    if (recupero == "S") {
+        var xemail = email;
+    } else {
+        if ($.trim($("#singin-email").val()) == "") {
+            mierror("DEBE INGRESAR SU EMAIL", "E");
+            $("#singin-email").focus();
+            return false;
+        }
+        var xemail = $.trim($("#singin-email").val());
+    }
+    //	if ($.trim($("#password").val()) == ""){
+    //		mierror("DEBE INGRESAR SU CONTRASEÑA", "E");
+    //		$("#password").focus();
+    //		return false;
+    //	}
+    /*	if (!confirm("CONFIRMA QUE DESEA SOLICITAR PRESUPUESTO")){
+        return false;
+    }	*/
+    $(".mensaje").css("color", "black");
+    $(".mensaje").html("Espere por favor...");
+    $.ajax({
+        url: "ajax/iniciarsesion.php",
+        global: false,
+        type: "POST",
+        data: ({
+            email: xemail,
+            password: $("#singin-password").val(),
+            recupero: recupero
+        }),
+        dataType: "html",
+        async: true,
+        success: function(result) {
+            var respuesta = result.split("&&&");
+            if (respuesta[0] != "OK") {
+                $(".mensaje").css("color", "red");
+                $(".mensaje").html(respuesta[1]);
+                console.log(result)
+                return false;
+            }
+            document.location.href = "home.php";
+        }
+    })
+}
+function fnrecordar(vt){
+	if (vt == '0'){
+	//	$("#tituloisesion").html("Inicia sesión");
+		recupero = 'X';
+		$("#tituloisesion").html("Ingrese la casilla de correo de la que desea restablecer la contraseña");
+		$("#finalizar").html("Restablecer Contraseña");
+		$("#divpassword").hide();
+		$("#restablecer").hide();
+		$("#email").focus();
+		$("#finalizar").attr("onclick", "fnrecordar('1')");
+	}else{
+		if ($.trim($("#email").val()) == ""){
+			mierror("DEBE INGRESAR SU EMAIL", "E");
+			$("#email").focus();
+			return false;
+		}
+	/*	if (!confirm("CONFIRMA QUE DESEA SOLICITAR PRESUPUESTO")){
+			return false;
+		}	*/
+		$(".mensaje").css("color", "black");
+		$(".mensaje").html("Espere por favor...");
+		$.ajax({
+			url: "ajax/recuperarpassword.php",
+			global: false,
+			type: "POST",
+			data: ({email : $("#email").val()}),
+			dataType: "html",
+			async:true,
+			success: function(result){
+				respuesta = result.split("&&&");
+				if (respuesta[0] != "OK"){
+					$(".mensaje").css("color", "red");
+					$(".mensaje").html(respuesta[1]);
+					console.log(result)
+					return false;
+				}
+				$(".mensaje").css("color", "green");
+				$(".mensaje").html(respuesta[1]);
+
+			//	$("#tituloisesion").html("Iniciar sesión");
+			//	$("#finalizar").html("Iniciar sesión");
+			//	$("#divpassword").show();
+			//	$("#restablecer").show();
+			//	$("#password").focus();
+			//	$("#finalizar").attr("onclick", "fnlogin()");
+			}
+		})
+	}
+}
+function fnlogout(){
+	if (!confirm("CONFIRMA QUE DESEA CERRAR SU SESIÓN?")){
+		return false;
+	}
+	$(".mensaje").css("color", "black");
+	$(".mensaje").html("Espere por favor...");
+	$.ajax({
+		url: "ajax/cerrarsesion.php",
+		global: false,
+		type: "POST",
+		data: ({datos : "S"}),
+		dataType: "html",
+		async:true,
+		success: function(result){
+			respuesta = result.split("&&&");
+			if (respuesta[0] != "OK"){
+				$(".mensaje").css("color", "red");
+				$(".mensaje").html(respuesta[1]);
+				console.log(result)
+				return false;
+			}
+            document.location.href = "login.php";
+		}
+	})
+}
+function fnactdatos(){
+	if ($.trim($("#act_nombre").val()) == ""){
+		mierror("DEBE INGRESAR SU NOMBRE", "E");
+		$("#act_nombre").focus();
+		return false;
+	}
+	if ($.trim($("#act_cuit").val()) == ""){
+		mierror("DEBE INGRESAR SU DOCUMENTO/CUIL/CUIT", "E");
+		$("#act_cuit").focus();
+		return false;
+	}
+	if ($.trim($("#act_direc").val()) == ""){
+		mierror("DEBE INGRESAR SU DIRECCIÓN", "E");
+		$("#act_direc").focus();
+		return false;
+	}
+	if ($.trim($("#act_cp").val()) == ""){
+		mierror("DEBE INGRESAR SU CÓDIGO POSTAL", "E");
+		$("#act_cp").focus();
+		return false;
+	}
+	if ($.trim($("#act_localidad").val()) == ""){
+		mierror("DEBE INGRESAR SU LOCALIDAD", "E");
+		$("#act_localidad").focus();
+		return false;
+	}
+	if ($.trim($("#act_email").val()) == ""){
+		mierror("DEBE INGRESAR UN CORREO ELECTRÓNICO", "E");
+		$("#act_email").focus();
+		return false;
+	}
+	if ($.trim($("#act_telef").val()) == ""){
+		mierror("DEBE INGRESAR SU Nº DE TELEFONO", "E");
+		$("#act_telef").focus();
+		return false;
+	}
+/*	if (!confirm("CONFIRMA QUE DESEA SOLICITAR PRESUPUESTO")){
+		return false;
+	}	*/
+	$(".mensaje").css("color", "black");
+	$(".mensaje").html("Espere por favor...");
+	$.ajax({
+		url: "ajax/actdatos.php",
+		global: false,
+		type: "POST",
+		data: ({nombre : $("#act_nombre").val(), cuit : $("#act_cuit").val(), direc : $("#act_direc").val(), tdirec : $("#act_tdirec").val(), cp : $("#act_cp").val(), localidad : $("#act_localidad").val(), telef : $("#act_telef").val(), email : $("#act_email").val()}),
+		dataType: "html",
+		async:true,
+		success: function(result){
+			respuesta = result.split("&&&");
+			if (respuesta[0] != "OK"){
+				$(".mensaje").css("color", "red");
+				$(".mensaje").html(respuesta[1]);
+				console.log(result)
+				return false;
+			}
+			$(".mensaje").css("color", "green");
+			$(".mensaje").html("Datos actualizados correctamente!");
+		}
+	})
+}
+function fnvercarrito(){
+	$.ajax({
+		url: "ajax/vercarrito.php",
+		global: false,
+		type: "POST",
+		data: ({datos : "S"}),
+		dataType: "html",
+		async:true,
+		success: function(result){
+			
+			$("#carr_productos").empty();
+			if (result != ""){
+				var respuesta = result.split("&&&");
+				if (respuesta[1] != ""){
+					var vdatos = respuesta[1].split("<@>");
+					var nvdatos = vdatos.length;
+					for (var n = 0; n < nvdatos; n++){
+						var vcampos = vdatos[n].split("<#>");
+						$("#carr_productos").append("<div class='product product-cart'><figure class='product-media'><a href='articulo.php?id="+vcampos[0]+"'><img src='"+vcampos[2]+"' alt='product' width='80' height='88' /></a><button class='btn btn-link btn-close' onclick='fneliminar("+vcampos[0]+")'><i class='fas fa-times'></i><span class='sr-only'>Cerrar</span></button></figure><div class='product-detail'><a href='articulo.php?id="+vcampos[0]+"' class='product-name'>"+vcampos[3]+"</a><div class='price-box'><span class='product-quantity'>"+vcampos[4]+"</span><span class='product-price'>"+vcampos[5]+"</span></div></div></div>");
+					}
+					$(".cart-action").show();
+				}else{
+					$("#carr_productos").append("<div class='product product-cart'>El carrito está vacio</div>");
+					$(".cart-action").hide();
+				}
+				$("#cart-total").html(respuesta[4]);
+				$(".cart-dropdown").addClass("opened");
+			}
+		}
+	})
+}
+function fnverdetalle(vid){
+	$('#tbldetalle').find("tbody").empty();
+	$(".mensaje").css("color", "black");
+	$(".mensaje").html("Espere por favor...");
+	$.ajax({
+		url: "ajax/detallepedido.php",
+		global: false,
+		type: "POST",
+		data: ({pedido : vid}),
+		dataType: "html",
+		async:true,
+		success: function(result){
+			respuesta = result.split("&&&");
+			if (respuesta[0] != "OK"){
+				$(".mensaje").css("color", "red");
+				$(".mensaje").html(respuesta[1]);
+				return false;
+			}
+			var datos = respuesta[1].split("<@>");
+			for (var d = 0; d < datos.length; d++){
+				var celdas = datos[d].split("<#>");
+				var vtd0 = '<th scope="row">'+celdas[0]+'</th>';
+				var vtd1 = '<td>'+celdas[1]+'</td>';
+				var vtd2 = '<td>'+celdas[2]+'</td>';
+				var vtd3 = "<td align='right'>$ "+celdas[3]+"</td>";
+				var vtd4 = '<td align="right">$ '+celdas[4]+'</td>';
+				$("#tbldetalle").append("<tr>"+vtd0+vtd1+vtd2+vtd3+vtd4+"</tr>");
+			}
+			var vtd0 = '<th scope="row">&nbsp;</th>';
+			var vtd1 = '<td>Total</td>';
+			var vtd2 = '<td>'+respuesta[2]+'</td>';
+			var vtd3 = "<td>&nbsp;</td>";
+			var vtd4 = "<td align='right'>$ "+respuesta[3]+'</td>';
+			$("#tbldetalle").append("<tr>"+vtd0+vtd1+vtd2+vtd3+vtd4+"</tr>");
+			$('#tbldetalle').find("caption").html("<h5>Pedido #"+vid+"</h5><a href='#' onclick='fnpedidos()'>Volver a los pedidos</a>");
+			$('#tbldetalle').show();
+			$("#tblpedidos").hide();
+		}
+	})
+}
+function fnpedidos(){
+	$("#tblpedidos").show();
+	$("#tbldetalle").hide();
+}
+function mierror(vmjs, vtipo){
+	if (vtipo == "E"){
+		$(".mensaje").css("color", "red");
+	}else{
+		$(".mensaje").css("color", "green");
+	}
+	$(".mensaje").html(vmjs);
+}
+function fnwhatsapp(vt){
+	if (vt == '0'){
+		$('#divwhatsapp').modal('show');
+	}else{
+		if (vt == 'Minorista'){
+			window.open("https://api.whatsapp.com/send/?phone=%2B5493426103720&text=Me+gustar%C3%ADa+saber+el+precio+de+...");
+		}else{
+			window.open("https://api.whatsapp.com/send/?phone=%2B5493424098281&text=Me+gustar%C3%ADa+saber+el+precio+de+...");
+		}
+		$('#divwhatsapp').modal('hide');
+	}
+}
+function fnverfactura(vfactura){
+	$("#cargando").show();
+	$.ajax({
+		url: "administracion/facturacion/ajax/imprimirventas.php",
+		global: false,
+		type: "POST",
+		data: ({id : vfactura}),
+		dataType: "html",
+		async:true,
+		success: function(resulti){
+			$("#cargando").hide();
+			var respuestai = new Array();
+			respuestai = resulti.split("&&&");
+			if (respuestai[0] != "OK"){
+				mierror(respuestai[1], "E");
+				console.log(resulti);
+				return false;
+			}
+			window.open("administracion/facturacion/ajax/"+respuestai[1]);
+		}
+	})
+}
